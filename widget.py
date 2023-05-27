@@ -4,24 +4,19 @@ import os
 from pathlib import Path
 
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
-from PySide6.QtCore import QFile, Slot, Signal, QObject, QThreadPool
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QGraphicsLineItem
+from PySide6.QtCore import QFile, Slot, Signal, QObject, QThreadPool, Qt
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtGui import QPixmap, QImage
+from PySide6.QtGui import QPixmap, QImage, QColor, QPen
 
-
-# Important:
-# You need to run the following command to generate the ui_form.py file
-#     pyside6-uic form.ui -o ui_form.py, or
-#     pyside2-uic form.ui -o ui_form.py
 from ui_form import Ui_Widget
 
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 
 class Widget(QMainWindow):
     def __init__(self, parent=None):
+
         super().__init__(parent)
         
         loader  = QUiLoader()
@@ -33,93 +28,76 @@ class Widget(QMainWindow):
         ui_file.close()
         self.setCentralWidget(self.ui)
 
+
+        # ========== GRAPIC SCREENS ==========
         self.loaded_img_screen = self.ui.loaded_img
-        self.loaded_img_graph = self.ui.loaded_img_graph
+
+        self.loaded_img_scene = QGraphicsScene()
+        self.loaded_img_screen.setScene(self.loaded_img_scene)
 
         self.processed_img_screen = self.ui.processed_img
-        self.processed_img_graph = self.ui.processed_img_graph
-        self.cv_load_image = 0
-        self.pixmap = 0
-        # self.label = self.ui.loaded_img
 
-        self.ui.load_img_btn.clicked.connect(self.onOpen)
+        self.processed_img_scene = QGraphicsScene()
+        self.processed_img_screen.setScene(self.processed_img_scene)
+
+
+        # ========== EVENTS ==========
+        self.ui.load_img_btn.clicked.connect(self.onLoad)
         self.ui.process_img_btn.clicked.connect(self.onProcces)
+        self.processed_img_scene.mousePressEvent = self.onSceneClicked
 
 
+        # ========== GLOBAL VARS ==========
+        self.cv_load_image = 0
+        self.input_pixmap = 0
+        self.processed_pixmap = 0
+        self.point_count = 0
+        self.points_arr = []
+        self.line = None
 
-    
-    def onPush(self):
-        # self.
-        # pixmap = 
-        print(self.ui.label.text(), QPixmap)   
 
-    def onProcessBtnPush(self):
-        pass
-
-    def onOpen(self):
+    def onLoad(self):
         file_dialog = QFileDialog()
         file_dialog.setNameFilter("Images (*.png *.xpm *.jpg *.jpeg *.bmp)")
         file_dialog.setFileMode(QFileDialog.ExistingFile)
-        # print(file_dialog.exec())
+
         if file_dialog.exec(): # открытия диал окна
             selected_files = file_dialog.selectedFiles()
             if selected_files:
                 file_path = selected_files[0]
                 self.cv_load_image = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
-                # print(self.cv_load_image)
-                self.pixmap = QPixmap(file_path)
-                self.setBlocksImage(self.loaded_img_screen, self.loaded_img_graph, self.pixmap)
+                self.input_pixmap = QPixmap(file_path)
+                self.setBlocksImage(self.loaded_img_screen, self.loaded_img_scene, self.input_pixmap)
+
 
 
     def onProcces(self):
+        if not self.input_pixmap:
+            return
+        
         img = self.getHistoEqualizatedImg(self.cv_load_image)
-        hist = self.getFrequencyArray(img)
-        plot = self.getPlotPixmap(hist)
 
         file_path = 'temp_img.png'
-
         cv2.imwrite(file_path, img)
+        self.processed_pixmap = QPixmap(file_path)
 
-        pixmap = QPixmap(file_path)
-
-        # pixmap = self.convertToPixmap(img)
-
-        self.setBlocksImage(self.processed_img_screen, self.processed_img_graph, pixmap)
-
-    
-    # def convertToPixmap(self, cv_img):
-    #     cv_img = cv2.cvtColor(cv_img, cv2.gray)
-
-    #     height, width, channel = cv_img.shape
-    #     bytes_per_line = width * channel
-    #     qimage = QImage(cv_img.data, width, height, bytes_per_line, QImage.Format_RGB888)
-
-    #     return qimage
+        self.setBlocksImage(self.processed_img_screen, self.processed_img_scene, self.processed_pixmap)
 
 
 
+    def setBlocksImage(self, graphic_block, graphic_scene, img):
+        graphic_scene.clear()
 
-    def setBlocksImage(self, img_block, graph_block, img):
-        hist = self.getFrequencyArray(self.cv_load_image)
+        # Create a QGraphicsPixmapItem with the given QPixmap
+        pixmap_item = QGraphicsPixmapItem(img)
 
-        plot_QPixmap = self.getPlotPixmap(hist)
+        # Add the QGraphicsPixmapItem to the QGraphicsScene
+        graphic_scene.addItem(pixmap_item)
 
-        # pixmap.scaledToHeight(200)
-        # self.loaded_img_screen.setPixmap(pixmap.scaled(200, 200))  # Set the image in the label
-        print(self.loaded_img_screen)
-
-        img_block.setPixmap(img.scaledToHeight(200))  # Set the image in the label
-        graph_block.setPixmap(plot_QPixmap.scaledToHeight(200))  # Set the image in the label
+        # Fit the view to the pixmap size
+        graphic_block.fitInView(pixmap_item, Qt.AspectRatioMode.KeepAspectRatio)
 
 
-    def getPlotPixmap(self, plot):
-        plt.bar(range(256), plot)
-
-        temp_file = 'temp_plot.png'
-        plt.savefig(temp_file)
-
-        return QPixmap(temp_file)
-    
 
     def getFrequencyArray(self, cv_img):
         # Create an empty numpy array to store the histogram
@@ -144,12 +122,96 @@ class Widget(QMainWindow):
     
 
 
+    # ========== EVENTS ==================== EVENTS ==========
+    # ========================================================
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+
+        if self.input_pixmap and self.processed_pixmap:
+            self.setBlocksImage(self.loaded_img_screen, self.loaded_img_scene, self.input_pixmap)
+            self.setBlocksImage(self.processed_img_screen, self.processed_img_scene, self.processed_pixmap)
+
+        elif self.input_pixmap:
+            self.setBlocksImage(self.loaded_img_screen, self.loaded_img_scene, self.input_pixmap)
+
+
+
+    def onSceneClicked(self, event):
+        if not self.processed_pixmap:
+            return
+        
+        dot_radius = 10
+
+        #? Если изображения нет то точки будут задавать ширину и из за этого их координаты будут не верны.
+        pos = event.scenePos()
+        scene_rect = self.processed_img_scene.sceneRect()
+
+        # if not scene_rect.contains(pos):
+        # Если координаты выходят за границы сцены, ограничиваем их в пределах сцены
+        # Единица дает место погрешности при округлении
+        pos.setX(
+            max(scene_rect.left() + int(dot_radius/2) + 1, 
+                min(pos.x(), scene_rect.right() - int(dot_radius/2) - 1)
+                ))
+        pos.setY(
+            max(scene_rect.top() + int(dot_radius/2) + 1, 
+                min(pos.y(), scene_rect.bottom() - int(dot_radius/2) - 1)
+                ))
+            
+
+        # Увеличиваем счетчик добавленных точек 
+        self.point_count += 1
+        dot_coords = (pos.x()-int(dot_radius/2),pos.y()-int(dot_radius/2))
+
+        
+        self.points_arr.append(dot_coords)
+
+        # Рисуем красную точку на сцене в месте клика
+        self.processed_img_scene.addEllipse(
+            dot_coords[0], dot_coords[1],
+            dot_radius, dot_radius, 
+            QColor("red")
+            )
+        # self.processed_img_scene.addEllipse(
+        #     pos.x()-int(dot_radius/2), 
+        #     pos.y()-int(dot_radius/2), 
+        #     dot_radius, dot_radius, 
+        #     QColor("red")
+        #     )
+        # Если это третья точка, очищаем сцену
+        if self.point_count % 2 == 0:
+
+            self.line = QGraphicsLineItem()
+            self.line.setPen(QPen(Qt.black, 2))
+            # self.line.setLine(start_point.x(), start_point.y(), 200, 200)  # Укажите координаты конечной точки линии здесь
+            self.line.setLine(
+                self.points_arr[0][0] + int(dot_radius/2), 
+                self.points_arr[0][1] + int(dot_radius/2), 
+                self.points_arr[1][0] + int(dot_radius/2), 
+                self.points_arr[1][1] + int(dot_radius/2))
+            
+            self.processed_img_scene.addItem(self.line)
+
+        elif self.point_count % 3 == 0:
+            if self.line is not None:
+                self.processed_img_scene.removeItem(self.line)
+                self.line = None
+            self.setBlocksImage(
+                self.processed_img_screen, 
+                self.processed_img_scene, 
+                self.processed_pixmap
+                )
+
+            self.point_count = 0
+            self.points_arr = []
+
+
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    # app.wind
     widget = Widget()
-    # widget.onPush()
     widget.show()
     
     sys.exit(app.exec())
