@@ -53,7 +53,7 @@ class Widget(QMainWindow,model.Proccess4Draw):
         self.ui.process_img_btn.clicked.connect(self.onProcces)
         self.ui.save_btn.clicked.connect(self.onSave)
         self.processed_img_scene.mousePressEvent = self.onSceneClicked
-        self.slider.valueChanged.connect(self.onSliderChange)
+        # self.slider.valueChanged.connect(self.onSliderChange)
 
         # ========== GLOBAL VARS ==========
         self.cv_load_image = None
@@ -68,7 +68,8 @@ class Widget(QMainWindow,model.Proccess4Draw):
         
     def onSliderChange(self, value):
         # self.slider_value=self.slider.value()
-        print(value)
+        # print(value)
+        pass
 
 
     def onLoad(self):
@@ -105,8 +106,11 @@ class Widget(QMainWindow,model.Proccess4Draw):
         
         ddepth = cv2.CV_16S
         kernel_size = 3
-        self.cv_processed_image = self.local_histogram_equalization(
-            self.clahe_process(self.cv_load_image),condution=self.slider.value())
+        # self.cv_processed_image = self.local_histogram_equalization(
+        #     self.clahe_process(self.cv_load_image),condution=self.slider.value())
+
+        self.cv_processed_image = self.clahe_process(self.cv_load_image, self.slider.value()/100)
+
         src = self.get_blur_guassian(self.cv_processed_image)
         dst = cv2.Laplacian(src, ddepth, ksize=kernel_size)
         img2 = cv2.convertScaleAbs(dst)

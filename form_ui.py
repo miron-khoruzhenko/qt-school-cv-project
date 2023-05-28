@@ -39,6 +39,10 @@ class Ui_Widget(object):
         self.vertical_slider = QSlider(Widget)
         self.vertical_slider.setObjectName(u"vertical_slider")
         self.vertical_slider.setStyleSheet(u"")
+        self.vertical_slider.setMinimum(1)
+        self.vertical_slider.setMaximum(200)
+        self.vertical_slider.setSingleStep(0)
+        self.vertical_slider.setPageStep(100)
         self.vertical_slider.setOrientation(Qt.Vertical)
 
         self.horizontalLayout_5.addWidget(self.vertical_slider)
