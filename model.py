@@ -72,7 +72,7 @@ class Kernel2Img:
             edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         return contours
 
-    def clahe_process(self, img: cv2.Mat, clip_limit=2.0, tile_grid_size=(8, 8)) -> cv2.Mat:
+    def clahe_process(self, img: cv2.Mat, clip_limit=.5, tile_grid_size=(8, 8)) -> cv2.Mat:
         # gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         clahe = cv2.createCLAHE(clipLimit=clip_limit,
                                 tileGridSize=tile_grid_size)
