@@ -43,6 +43,9 @@
   <layout class="QHBoxLayout" name="horizontalLayout_5">
    <item>
     <widget class="QSlider" name="vertical_slider">
+     <property name="styleSheet">
+      <string notr="true"/>
+     </property>
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -99,6 +102,10 @@
            <property name="cursor">
             <cursorShape>PointingHandCursor</cursorShape>
            </property>
+           <property name="styleSheet">
+            <string notr="true">background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(74, 74, 74, 255), stop:1 rgba(64, 64, 64, 255));
+border: 1px solid #6a6a6a;</string>
+           </property>
            <property name="text">
             <string>Load Image</string>
            </property>
@@ -120,6 +127,10 @@
            </property>
            <property name="cursor">
             <cursorShape>PointingHandCursor</cursorShape>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(74, 74, 74, 255), stop:1 rgba(64, 64, 64, 255));
+border: 1px solid #6a6a6a;</string>
            </property>
            <property name="text">
             <string>Process</string>
@@ -208,6 +219,10 @@
              <width>150</width>
              <height>50</height>
             </size>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(74, 74, 74, 255), stop:1 rgba(64, 64, 64, 255));
+border: 1px solid #6a6a6a;</string>
            </property>
            <property name="text">
             <string>Save</string>
