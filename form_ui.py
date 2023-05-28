@@ -32,6 +32,8 @@ class Ui_Widget(object):
         Widget.setMinimumSize(QSize(550, 520))
         Widget.setMaximumSize(QSize(99999, 99999))
         Widget.setCursor(QCursor(Qt.ArrowCursor))
+        Widget.setAutoFillBackground(False)
+        Widget.setStyleSheet(u"background: #33333;")
         self.horizontalLayout_5 = QHBoxLayout(Widget)
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
         self.vertical_slider = QSlider(Widget)
