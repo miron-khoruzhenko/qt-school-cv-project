@@ -77,7 +77,8 @@ class Ui_Widget(object):
         self.load_img_btn.setMinimumSize(QSize(150, 50))
         self.load_img_btn.setCursor(QCursor(Qt.PointingHandCursor))
         self.load_img_btn.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(74, 74, 74, 255), stop:1 rgba(64, 64, 64, 255));\n"
-"border: 1px solid #6a6a6a;")
+"border: 1px solid #6a6a6a;\n"
+"color: white;")
 
         self.verticalLayout_3.addWidget(self.load_img_btn)
 
@@ -88,7 +89,8 @@ class Ui_Widget(object):
         self.process_img_btn.setMinimumSize(QSize(150, 50))
         self.process_img_btn.setCursor(QCursor(Qt.PointingHandCursor))
         self.process_img_btn.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(74, 74, 74, 255), stop:1 rgba(64, 64, 64, 255));\n"
-"border: 1px solid #6a6a6a;")
+"border: 1px solid #6a6a6a;\n"
+"color: white;")
 
         self.verticalLayout_3.addWidget(self.process_img_btn)
 
@@ -134,7 +136,8 @@ class Ui_Widget(object):
         self.save_btn.setSizePolicy(sizePolicy)
         self.save_btn.setMinimumSize(QSize(150, 50))
         self.save_btn.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(74, 74, 74, 255), stop:1 rgba(64, 64, 64, 255));\n"
-"border: 1px solid #6a6a6a;")
+"border: 1px solid #6a6a6a;\n"
+"color: white;")
 
         self.verticalLayout_4.addWidget(self.save_btn)
 
