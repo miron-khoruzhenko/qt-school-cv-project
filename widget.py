@@ -6,11 +6,11 @@ from pathlib import Path
 
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QGraphicsLineItem
-from PySide6.QtCore import QFile, Slot, Signal, QObject, QThreadPool, Qt
+from PySide6.QtCore import QFile, Qt
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtGui import QPixmap, QImage, QColor, QPen
+from PySide6.QtGui import QPixmap, QColor, QPen
 
-from ui_form import Ui_Widget
+# from ui_form import Ui_Widget
 
 import cv2
 import numpy as np
