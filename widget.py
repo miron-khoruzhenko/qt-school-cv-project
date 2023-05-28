@@ -14,11 +14,13 @@ from ui_form import Ui_Widget
 
 import cv2
 import numpy as np
+import model
 
-class Widget(QMainWindow):
+class Widget(QMainWindow,model.Proccess4Draw):
     def __init__(self, parent=None):
 
         super().__init__(parent)
+        model.Proccess4Draw.__init__(self)
         
         loader  = QUiLoader()
         path    = os.fspath(Path(__file__).resolve().parent / "form.ui")
@@ -29,6 +31,7 @@ class Widget(QMainWindow):
         ui_file.close()
         self.setCentralWidget(self.ui)
 
+        self.slider_value=0.0
 
         # ========== GRAPIC SCREENS ==========
         self.loaded_img_screen = self.ui.loaded_img
@@ -64,6 +67,7 @@ class Widget(QMainWindow):
         self.line = None
         
     def onSliderChange(self, value):
+        # self.slider_value=self.slider.value()
         print(value)
 
 
@@ -99,10 +103,19 @@ class Widget(QMainWindow):
         if not self.input_pixmap:
             return
         
-        self.cv_processed_image = self.getHistoEqualizatedImg(self.cv_load_image)
-
+        ddepth = cv2.CV_16S
+        kernel_size = 3
+        self.cv_processed_image = self.local_histogram_equalization(
+            self.clahe_process(self.cv_load_image),condution=self.slider.value())
+        src = self.get_blur_guassian(self.cv_processed_image)
+        dst = cv2.Laplacian(src, ddepth, ksize=kernel_size)
+        img2 = cv2.convertScaleAbs(dst)
+        
+        # self.cv_processed_image = self.getHistoEqualizatedImg(self.cv_load_image)
+        self.cv_processed_image = self.addImg(img1=self.cv_processed_image, img2=img2)
         file_path = 'temp_img.png'
         cv2.imwrite(file_path, self.cv_processed_image)
+        
         self.processed_pixmap = QPixmap(file_path)
         os.remove(file_path)
 
