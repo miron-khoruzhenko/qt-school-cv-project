@@ -2,6 +2,7 @@
 
 - [**Image Processing Widget**](#image-processing-widget)
 	- [**Prerequisites**](#prerequisites)
+	- [**Installation**](#installation)
 	- [**Features**](#features)
 	- [**Image Processing Techniques**](#image-processing-techniques)
 	- [**Usage**](#usage)
@@ -21,7 +22,7 @@ Before running the application, make sure you have the following dependencies in
 - NumPy
 - PySide6
 
-Installation
+## **Installation**
 
 1. Clone the repository or download the code files to your local machine.
 
