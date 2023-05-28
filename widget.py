@@ -66,10 +66,10 @@ class Widget(QMainWindow,model.Proccess4Draw):
         self.points_arr = []
         self.line = None
         
-    def onSliderChange(self, value):
-        # self.slider_value=self.slider.value()
-        # print(value)
-        pass
+    # def onSliderChange(self, value):
+    #     # self.slider_value=self.slider.value()
+    #     # print(value)
+    #     pass
 
 
     def onLoad(self):
@@ -119,35 +119,27 @@ class Widget(QMainWindow,model.Proccess4Draw):
     def setBlocksImage(self, graphic_block, graphic_scene, img):
         graphic_scene.clear()
 
-        # Create a QGraphicsPixmapItem with the given QPixmap
         pixmap_item = QGraphicsPixmapItem(img)
 
-        # Add the QGraphicsPixmapItem to the QGraphicsScene
         graphic_scene.addItem(pixmap_item)
 
-        # Fit the view to the pixmap size
         graphic_block.fitInView(pixmap_item, Qt.AspectRatioMode.KeepAspectRatio)
 
+    
+    def clearGraphicItems(self):
+        # Удаляет линии и точки со сцены. 
+        # Должен быть до setBlockImage потому что там идет отчистка сцены
+        if self.line:
+            self.processed_img_scene.removeItem(self.line)
+            self.line = None
+        self.point_count = 0
+        self.points_arr = []
 
-
-    def getFrequencyArray(self, cv_img):
-        # Create an empty numpy array to store the histogram
-        hist = np.zeros((256), dtype=int)
-
-        # Iterate over each pixel in the image
-        for i in range(cv_img.shape[0]):
-            for j in range(cv_img.shape[1]):
-                # Increment the histogram bin corresponding to the pixel value
-                hist[cv_img[i,j]] += 1
-
-        return hist
 
     
     def getClaheHisto(self, img):
         ddepth = cv2.CV_16S
         kernel_size = 3
-        # self.cv_processed_image = self.local_histogram_equalization(
-        #     self.clahe_process(self.cv_load_image),condution=self.slider.value())
 
         processed_img = self.clahe_process(img, self.slider.value()/100)
 
@@ -166,11 +158,13 @@ class Widget(QMainWindow,model.Proccess4Draw):
         super().resizeEvent(event)
 
         if self.input_pixmap and self.processed_pixmap:
+            self.clearGraphicItems() # должен быть выше setBlocksImage
             self.setBlocksImage(self.loaded_img_screen, self.loaded_img_scene, self.input_pixmap)
             self.setBlocksImage(self.processed_img_screen, self.processed_img_scene, self.processed_pixmap)
 
         elif self.input_pixmap:
             self.setBlocksImage(self.loaded_img_screen, self.loaded_img_scene, self.input_pixmap)
+
 
 
 
@@ -184,7 +178,6 @@ class Widget(QMainWindow,model.Proccess4Draw):
         pos = event.scenePos()
         scene_rect = self.processed_img_scene.sceneRect()
 
-        # if not scene_rect.contains(pos):
         # Если координаты выходят за границы сцены, ограничиваем их в пределах сцены
         # Единица дает место погрешности при округлении
         pos.setX(
@@ -234,17 +227,14 @@ class Widget(QMainWindow,model.Proccess4Draw):
             self.length_label.setText('Length: ' + str(distance))
 
         elif self.point_count % 3 == 0:
-            if self.line is not None:
-                self.processed_img_scene.removeItem(self.line)
-                self.line = None
+            self.clearGraphicItems()
+
             self.setBlocksImage(
                 self.processed_img_screen, 
                 self.processed_img_scene, 
                 self.processed_pixmap
                 )
 
-            self.point_count = 0
-            self.points_arr = []
 
 
 
