@@ -75,3 +75,5 @@ CMakeLists.txt.user*
 #USER
 /build
 /dist
+
+*.pyproject*
