@@ -10,11 +10,11 @@ from PySide6.QtCore import QFile, Qt
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtGui import QPixmap, QColor, QPen
 
-# from ui_form import Ui_Widget
 
 import cv2
 import numpy as np
 import model
+
 
 class Widget(QMainWindow,model.Proccess4Draw):
     def __init__(self, parent=None):
@@ -104,19 +104,8 @@ class Widget(QMainWindow,model.Proccess4Draw):
         if not self.input_pixmap:
             return
         
-        ddepth = cv2.CV_16S
-        kernel_size = 3
-        # self.cv_processed_image = self.local_histogram_equalization(
-        #     self.clahe_process(self.cv_load_image),condution=self.slider.value())
-
-        self.cv_processed_image = self.clahe_process(self.cv_load_image, self.slider.value()/100)
-
-        src = self.get_blur_guassian(self.cv_processed_image)
-        dst = cv2.Laplacian(src, ddepth, ksize=kernel_size)
-        img2 = cv2.convertScaleAbs(dst)
+        self.cv_processed_image = self.getClaheHisto(self.cv_load_image)
         
-        # self.cv_processed_image = self.getHistoEqualizatedImg(self.cv_load_image)
-        self.cv_processed_image = self.addImg(img1=self.cv_processed_image, img2=img2)
         file_path = 'temp_img.png'
         cv2.imwrite(file_path, self.cv_processed_image)
         
@@ -153,15 +142,21 @@ class Widget(QMainWindow,model.Proccess4Draw):
 
         return hist
 
-
-    def getHistoEqualizatedImg(self, cv_img):
-        hist = self.getFrequencyArray(cv_img)
-
-        cdf = np.cumsum(hist) 
-        img_eq = ((cdf[cv_img]) * 255 / (cv_img.size)).astype(np.uint8)
-
-        return img_eq
     
+    def getClaheHisto(self, img):
+        ddepth = cv2.CV_16S
+        kernel_size = 3
+        # self.cv_processed_image = self.local_histogram_equalization(
+        #     self.clahe_process(self.cv_load_image),condution=self.slider.value())
+
+        processed_img = self.clahe_process(img, self.slider.value()/100)
+
+        src = self.get_blur_guassian(processed_img)
+        dst = cv2.Laplacian(src, ddepth, ksize=kernel_size)
+        img2 = cv2.convertScaleAbs(dst)
+        
+        return self.addImg(img1=processed_img, img2=img2)
+
 
 
     # ========== EVENTS ==================== EVENTS ==========
