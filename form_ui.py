@@ -15,9 +15,9 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QFont, QFontDatabase, QGradient, QIcon,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
-from PySide6.QtWidgets import (QApplication, QFrame, QGraphicsView, QHBoxLayout,
-    QPushButton, QSizePolicy, QSlider, QVBoxLayout,
-    QWidget)
+from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QFrame, QGraphicsView,
+    QHBoxLayout, QLabel, QPushButton, QSizePolicy,
+    QSlider, QVBoxLayout, QWidget)
 
 class Ui_Widget(object):
     def setupUi(self, Widget):
@@ -34,11 +34,11 @@ class Ui_Widget(object):
         Widget.setCursor(QCursor(Qt.ArrowCursor))
         self.horizontalLayout_5 = QHBoxLayout(Widget)
         self.horizontalLayout_5.setObjectName(u"horizontalLayout_5")
-        self.verticalSlider = QSlider(Widget)
-        self.verticalSlider.setObjectName(u"verticalSlider")
-        self.verticalSlider.setOrientation(Qt.Vertical)
+        self.vertical_slider = QSlider(Widget)
+        self.vertical_slider.setObjectName(u"vertical_slider")
+        self.vertical_slider.setOrientation(Qt.Vertical)
 
-        self.horizontalLayout_5.addWidget(self.verticalSlider)
+        self.horizontalLayout_5.addWidget(self.vertical_slider)
 
         self.verticalLayout_2 = QVBoxLayout()
         self.verticalLayout_2.setObjectName(u"verticalLayout_2")
@@ -109,6 +109,7 @@ class Ui_Widget(object):
         self.processed_img.setObjectName(u"processed_img")
         self.processed_img.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.processed_img.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.processed_img.setSizeAdjustPolicy(QAbstractScrollArea.AdjustToContents)
         brush = QBrush(QColor(0, 0, 0, 255))
         brush.setStyle(Qt.Dense5Pattern)
         self.processed_img.setBackgroundBrush(brush)
@@ -120,21 +121,25 @@ class Ui_Widget(object):
 
         self.verticalLayout_4 = QVBoxLayout()
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.pushButton_2 = QPushButton(Widget)
-        self.pushButton_2.setObjectName(u"pushButton_2")
-        sizePolicy.setHeightForWidth(self.pushButton_2.sizePolicy().hasHeightForWidth())
-        self.pushButton_2.setSizePolicy(sizePolicy)
-        self.pushButton_2.setMinimumSize(QSize(150, 50))
+        self.save_btn = QPushButton(Widget)
+        self.save_btn.setObjectName(u"save_btn")
+        sizePolicy.setHeightForWidth(self.save_btn.sizePolicy().hasHeightForWidth())
+        self.save_btn.setSizePolicy(sizePolicy)
+        self.save_btn.setMinimumSize(QSize(150, 50))
 
-        self.verticalLayout_4.addWidget(self.pushButton_2)
+        self.verticalLayout_4.addWidget(self.save_btn)
 
-        self.pushButton_3 = QPushButton(Widget)
-        self.pushButton_3.setObjectName(u"pushButton_3")
-        sizePolicy.setHeightForWidth(self.pushButton_3.sizePolicy().hasHeightForWidth())
-        self.pushButton_3.setSizePolicy(sizePolicy)
-        self.pushButton_3.setMinimumSize(QSize(150, 50))
+        self.length_label = QLabel(Widget)
+        self.length_label.setObjectName(u"length_label")
+        sizePolicy.setHeightForWidth(self.length_label.sizePolicy().hasHeightForWidth())
+        self.length_label.setSizePolicy(sizePolicy)
+        self.length_label.setMinimumSize(QSize(150, 50))
+        self.length_label.setStyleSheet(u"background: #222222;\n"
+"border: 1px solid #2d2d2d;")
+        self.length_label.setFrameShape(QFrame.NoFrame)
+        self.length_label.setAlignment(Qt.AlignCenter)
 
-        self.verticalLayout_4.addWidget(self.pushButton_3)
+        self.verticalLayout_4.addWidget(self.length_label)
 
 
         self.horizontalLayout_2.addLayout(self.verticalLayout_4)
@@ -157,7 +162,7 @@ class Ui_Widget(object):
         Widget.setWindowTitle(QCoreApplication.translate("Widget", u"Widget", None))
         self.load_img_btn.setText(QCoreApplication.translate("Widget", u"Load Image", None))
         self.process_img_btn.setText(QCoreApplication.translate("Widget", u"Process", None))
-        self.pushButton_2.setText(QCoreApplication.translate("Widget", u"Save", None))
-        self.pushButton_3.setText(QCoreApplication.translate("Widget", u"Save", None))
+        self.save_btn.setText(QCoreApplication.translate("Widget", u"Save", None))
+        self.length_label.setText("")
     # retranslateUi
 

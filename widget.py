@@ -1,6 +1,7 @@
 # This Python file uses the following encoding: utf-8
 import sys
 import os
+import math
 from pathlib import Path
 
 
@@ -40,20 +41,30 @@ class Widget(QMainWindow):
         self.processed_img_scene = QGraphicsScene()
         self.processed_img_screen.setScene(self.processed_img_scene)
 
+        self.length_label = self.ui.length_label
+        self.slider = self.ui.vertical_slider
+
 
         # ========== EVENTS ==========
         self.ui.load_img_btn.clicked.connect(self.onLoad)
         self.ui.process_img_btn.clicked.connect(self.onProcces)
+        self.ui.save_btn.clicked.connect(self.onSave)
         self.processed_img_scene.mousePressEvent = self.onSceneClicked
-
+        self.slider.valueChanged.connect(self.onSliderChange)
 
         # ========== GLOBAL VARS ==========
-        self.cv_load_image = 0
-        self.input_pixmap = 0
-        self.processed_pixmap = 0
+        self.cv_load_image = None
+        self.cv_processed_image = None
+        
+        self.input_pixmap = None
+        self.processed_pixmap = None
+
         self.point_count = 0
         self.points_arr = []
         self.line = None
+        
+    def onSliderChange(self, value):
+        print(value)
 
 
     def onLoad(self):
@@ -70,16 +81,30 @@ class Widget(QMainWindow):
                 self.setBlocksImage(self.loaded_img_screen, self.loaded_img_scene, self.input_pixmap)
 
 
+    def onSave(self):
+        if not self.processed_pixmap:
+            return
+        
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        save_path, _ = QFileDialog.getSaveFileName(self, "Save Image", "", "Images (*.png *.jpg *.jpeg)", options=options)
+
+        if save_path:
+            cv2.imwrite(save_path + '.png', self.cv_processed_image)  # Сохранение изображения по выбранному пути
+            print("Image saved successfully.")
+
+
 
     def onProcces(self):
         if not self.input_pixmap:
             return
         
-        img = self.getHistoEqualizatedImg(self.cv_load_image)
+        self.cv_processed_image = self.getHistoEqualizatedImg(self.cv_load_image)
 
         file_path = 'temp_img.png'
-        cv2.imwrite(file_path, img)
+        cv2.imwrite(file_path, self.cv_processed_image)
         self.processed_pixmap = QPixmap(file_path)
+        os.remove(file_path)
 
         self.setBlocksImage(self.processed_img_screen, self.processed_img_scene, self.processed_pixmap)
 
@@ -172,26 +197,29 @@ class Widget(QMainWindow):
             dot_coords[0], dot_coords[1],
             dot_radius, dot_radius, 
             QColor("red")
-            )
-        # self.processed_img_scene.addEllipse(
-        #     pos.x()-int(dot_radius/2), 
-        #     pos.y()-int(dot_radius/2), 
-        #     dot_radius, dot_radius, 
-        #     QColor("red")
-        #     )
+        )
+
         # Если это третья точка, очищаем сцену
         if self.point_count % 2 == 0:
 
             self.line = QGraphicsLineItem()
-            self.line.setPen(QPen(Qt.black, 2))
+            self.line.setPen(QPen(Qt.red, 2))
             # self.line.setLine(start_point.x(), start_point.y(), 200, 200)  # Укажите координаты конечной точки линии здесь
             self.line.setLine(
                 self.points_arr[0][0] + int(dot_radius/2), 
                 self.points_arr[0][1] + int(dot_radius/2), 
                 self.points_arr[1][0] + int(dot_radius/2), 
-                self.points_arr[1][1] + int(dot_radius/2))
-            
+                self.points_arr[1][1] + int(dot_radius/2)
+            )
+
+            distance = math.sqrt(
+                (self.points_arr[0][0] - self.points_arr[1][0])**2 + 
+                (self.points_arr[0][1] - self.points_arr[0][1])**2
+            )
+            distance = int(distance*100)/100
+
             self.processed_img_scene.addItem(self.line)
+            self.length_label.setText('Length: ' + str(distance))
 
         elif self.point_count % 3 == 0:
             if self.line is not None:
