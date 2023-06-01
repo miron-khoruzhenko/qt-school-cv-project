@@ -79,9 +79,12 @@ class Widget(QMainWindow,model.Proccess4Draw):
             self.ui.process_img_btn.clicked.connect(self.onProcessImg)
         else:
             self.ui.process_video_btn.clicked.connect(self.onProcessVideo)
+            self.timer = 0
 
 
     def changeWindows(self):
+        self.clearGraphicItems()
+
         if self.mode == "image":
             self.winName = "ui/video_process.ui"
             self.winTitle = "Video Processing"
@@ -91,6 +94,9 @@ class Widget(QMainWindow,model.Proccess4Draw):
             self.winName = "ui/image_process.ui"
             self.winTitle = "Image Processing"
             self.mode = "image"
+            if self.timer != 0:
+                self.timer.stop()
+                timer = 0
 
         self.setupUI(self.winName, self.winTitle)
 
@@ -140,6 +146,8 @@ class Widget(QMainWindow,model.Proccess4Draw):
 
 
     def onProcessVideo(self):
+        if self.timer != 0:
+            return
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.processVideo)
         self.timer.start(30)  # Запускаем таймер
@@ -151,6 +159,7 @@ class Widget(QMainWindow,model.Proccess4Draw):
         if not ret:
             # Достигнут конец видео
             self.timer.stop()
+            self.timer = 0 
             return
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
