@@ -88,7 +88,6 @@ class Widget(QMainWindow,model.Proccess4Draw):
 
 
     def changeWindows(self):
-        self.clearGraphicItems()
 
         if self.mode == "image":
             self.winName = "ui/video_process.ui"
