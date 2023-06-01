@@ -6,9 +6,9 @@ from pathlib import Path
 
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QGraphicsPixmapItem, QGraphicsScene, QGraphicsLineItem
-from PySide6.QtCore import QFile, Qt
+from PySide6.QtCore import QFile, Qt, QTimer
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtGui import QPixmap, QColor, QPen
+from PySide6.QtGui import QPixmap, QColor, QPen, QImage
 
 
 import cv2
@@ -22,16 +22,23 @@ class Widget(QMainWindow,model.Proccess4Draw):
         super().__init__(parent)
         model.Proccess4Draw.__init__(self)
         
+        self.winName = "ui/image_process.ui"
+        self.winTitle = "Image Processing"
+        self.mode = 'image'
+
+        self.setupUI(self.winName, self.winTitle)
+
+
+    def setupUI(self, winName, title):
         loader  = QUiLoader()
-        path    = os.fspath(Path(__file__).resolve().parent / "form.ui")
+        path    = os.fspath(Path(__file__).resolve().parent / winName)
 
         ui_file = QFile(path)
         ui_file.open(QFile.ReadOnly)
         self.ui = loader.load(ui_file)
         ui_file.close()
         self.setCentralWidget(self.ui)
-
-        self.slider_value=0.0
+        self.setWindowTitle(title)
 
         # ========== GRAPIC SCREENS ==========
         self.loaded_img_screen = self.ui.loaded_img
@@ -49,11 +56,13 @@ class Widget(QMainWindow,model.Proccess4Draw):
 
 
         # ========== EVENTS ==========
-        self.ui.load_img_btn.clicked.connect(self.onLoad)
-        self.ui.process_img_btn.clicked.connect(self.onProcces)
-        self.ui.save_btn.clicked.connect(self.onSave)
+        self.ui.load_img_btn.clicked.connect(self.onLoadBtnPress)
+        self.ui.process_img_btn.clicked.connect(self.onProccesImg)
+        self.ui.save_btn.clicked.connect(self.onSaveBtnPress)
+        self.ui.change_window.clicked.connect(self.changeWindows)
+
         self.processed_img_scene.mousePressEvent = self.onSceneClicked
-        # self.slider.valueChanged.connect(self.onSliderChange)
+
 
         # ========== GLOBAL VARS ==========
         self.cv_load_image = None
@@ -65,28 +74,45 @@ class Widget(QMainWindow,model.Proccess4Draw):
         self.point_count = 0
         self.points_arr = []
         self.line = None
-        
-    # def onSliderChange(self, value):
-    #     # self.slider_value=self.slider.value()
-    #     # print(value)
-    #     pass
 
 
-    def onLoad(self):
-        file_dialog = QFileDialog()
-        file_dialog.setNameFilter("Images (*.png *.xpm *.jpg *.jpeg *.bmp)")
-        file_dialog.setFileMode(QFileDialog.ExistingFile)
+    def changeWindows(self):
+        if self.mode == "image":
+            self.winName = "ui/video_process.ui"
+            self.winTitle = "Video Processing"
+            self.mode = "video"
 
-        if file_dialog.exec(): # открытия диал окна
-            selected_files = file_dialog.selectedFiles()
-            if selected_files:
-                file_path = selected_files[0]
-                self.cv_load_image = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
-                self.input_pixmap = QPixmap(file_path)
-                self.setBlocksImage(self.loaded_img_screen, self.loaded_img_scene, self.input_pixmap)
+        else:
+            self.winName = "ui/image_process.ui"
+            self.winTitle = "Image Processing"
+            self.mode = "image"
+
+        self.setupUI(self.winName, self.winTitle)
 
 
-    def onSave(self):
+    def onLoadBtnPress(self):
+        if self.mode == "image":
+            file_dialog = QFileDialog()
+            file_dialog.setNameFilter("Images (*.png *.xpm *.jpg *.jpeg *.bmp)")
+            file_dialog.setFileMode(QFileDialog.ExistingFile)
+
+            if file_dialog.exec(): # открытия диал окна
+                selected_files = file_dialog.selectedFiles()
+                if selected_files:
+                    file_path = selected_files[0]
+                    self.cv_load_image = cv2.imread(file_path, cv2.IMREAD_GRAYSCALE)
+                    self.input_pixmap = QPixmap(file_path)
+                    self.setBlocksImage(self.loaded_img_screen, self.loaded_img_scene, self.input_pixmap)
+        else:
+            video_path, _ = QFileDialog.getOpenFileName(self, "Open Video", "", "Video Files (*.mp4 *.avi)")
+            if video_path:
+                print("\n\n\n\n\n\n"+video_path+"\n\n\n\n\n\n")
+                self.video_capture = cv2.VideoCapture(video_path)
+                print("\n\n\n\n\n\n",os.access(video_path, os.W_OK),"\n\n\n\n\n\n")
+                self.processVideo()  # Начало обработки видео
+
+
+    def onSaveBtnPress(self):
         if not self.processed_pixmap:
             return
         
@@ -99,8 +125,7 @@ class Widget(QMainWindow,model.Proccess4Draw):
             print("Image saved successfully.")
 
 
-
-    def onProcces(self):
+    def onProccesImg(self):
         if not self.input_pixmap:
             return
         
@@ -114,6 +139,39 @@ class Widget(QMainWindow,model.Proccess4Draw):
 
         self.setBlocksImage(self.processed_img_screen, self.processed_img_scene, self.processed_pixmap)
 
+
+    def onProcessVideo(self):
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.processVideo)
+        self.timer.start(30)  # Запускаем таймер
+        
+    
+    def processVideo(self):
+        if self.cv_load_image is None:
+            return
+        
+        # Чтение кадра из видео
+        ret, frame = self.video_capture.read()
+        if not ret:
+            # Достигнут конец видео
+            self.timer.stop()
+            return
+        
+        # Обработка кадра
+        processed_frame = self.getClaheHisto(frame)
+        
+        # Отображение результата в блоке processed_img
+        processed_pixmap = self.convertFrameToPixmap(processed_frame)
+        self.setBlocksImage(self.processed_img_screen, self.processed_img_scene, processed_pixmap)
+
+
+    def convertFrameToPixmap(self, frame):
+        # Конвертация кадра в QPixmap для отображения в QGraphicsScene
+        height, width, channels = frame.shape
+        bytes_per_line = channels * width
+        qimage = QImage(frame.data, width, height, bytes_per_line, QImage.Format_RGB888)
+        pixmap = QPixmap.fromImage(qimage.rgbSwapped())
+        return pixmap
 
 
     def setBlocksImage(self, graphic_block, graphic_scene, img):
