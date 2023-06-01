@@ -147,17 +147,15 @@ class Ui_Widget(object):
 
         self.verticalLayout_4 = QVBoxLayout()
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
-        self.save_btn = QPushButton(Widget)
-        self.save_btn.setObjectName(u"save_btn")
-        sizePolicy.setHeightForWidth(self.save_btn.sizePolicy().hasHeightForWidth())
-        self.save_btn.setSizePolicy(sizePolicy)
-        self.save_btn.setMinimumSize(QSize(150, 50))
-        self.save_btn.setCursor(QCursor(Qt.PointingHandCursor))
-        self.save_btn.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(74, 74, 74, 255), stop:1 rgba(64, 64, 64, 255));\n"
+        self.stop_btn = QPushButton(Widget)
+        self.stop_btn.setObjectName(u"stop_btn")
+        self.stop_btn.setMinimumSize(QSize(150, 50))
+        self.stop_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.stop_btn.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(74, 74, 74, 255), stop:1 rgba(64, 64, 64, 255));\n"
 "border: 1px solid #6a6a6a;\n"
 "color: white;")
 
-        self.verticalLayout_4.addWidget(self.save_btn)
+        self.verticalLayout_4.addWidget(self.stop_btn)
 
         self.length_label = QLabel(Widget)
         self.length_label.setObjectName(u"length_label")
@@ -193,7 +191,7 @@ class Ui_Widget(object):
         self.change_window.setText(QCoreApplication.translate("Widget", u"Mode: Video", None))
         self.load_img_btn.setText(QCoreApplication.translate("Widget", u"Load Video", None))
         self.process_video_btn.setText(QCoreApplication.translate("Widget", u"Process", None))
-        self.save_btn.setText(QCoreApplication.translate("Widget", u"Save", None))
+        self.stop_btn.setText(QCoreApplication.translate("Widget", u"Stop - Continue", None))
         self.length_label.setText("")
     # retranslateUi
 

@@ -58,7 +58,6 @@ class Widget(QMainWindow,model.Proccess4Draw):
         # ========== EVENTS ==========
         self.ui.load_img_btn.clicked.connect(self.onLoadBtnPress)
 
-        self.ui.save_btn.clicked.connect(self.onSaveBtnPress)
         self.ui.change_window.clicked.connect(self.changeWindows)
 
         self.processed_img_scene.mousePressEvent = self.onSceneClicked
@@ -75,11 +74,17 @@ class Widget(QMainWindow,model.Proccess4Draw):
         self.points_arr = []
         self.line = None
 
+        self.is_timer_working = None
+
         if self.mode == "image":
             self.ui.process_img_btn.clicked.connect(self.onProcessImg)
+            self.ui.save_btn.clicked.connect(self.onSaveBtnPress)
+
         else:
             self.ui.process_video_btn.clicked.connect(self.onProcessVideo)
+            self.ui.stop_btn.clicked.connect(self.onStopContinueBtnPress)
             self.timer = 0
+            self.is_timer_working = False
 
 
     def changeWindows(self):
@@ -96,9 +101,13 @@ class Widget(QMainWindow,model.Proccess4Draw):
             self.mode = "image"
             if self.timer != 0:
                 self.timer.stop()
-                timer = 0
+                self.timer = 0
 
         self.setupUI(self.winName, self.winTitle)
+
+
+    # ========== OnPress ==================== OnPress ==========
+    # ==========================================================
 
 
     def onLoadBtnPress(self):
@@ -151,33 +160,46 @@ class Widget(QMainWindow,model.Proccess4Draw):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.processVideo)
         self.timer.start(30)  # Запускаем таймер
+        self.is_timer_working = True
+
+
+    def onStopContinueBtnPress(self):
+        if self.timer == 0:
+            return 
+    
+        if self.is_timer_working:
+            self.timer.stop()
+            self.is_timer_working = False
+        else:
+            self.timer.start(30)
+            self.is_timer_working = True
 
 
     def processVideo(self):        
-        # Чтение кадра из видео
         ret, frame = self.video_capture.read()
+
+
         if not ret:
-            # Достигнут конец видео
             self.timer.stop()
             self.timer = 0 
+            self.is_timer_working = False
             return
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        self.input_pixmap = self.convertFrameToPixmap(frame)
         processed_frame = self.getClaheHisto(frame)
-        processed_pixmap = self.convertFrameToPixmap(processed_frame)
+
+        self.input_pixmap = self.convertFrameToPixmap(frame)
+        self.processed_pixmap = self.convertFrameToPixmap(processed_frame)
+
         self.setBlocksImage(self.loaded_img_screen, self.loaded_img_scene, self.input_pixmap)
-        self.setBlocksImage(self.processed_img_screen, self.processed_img_scene, processed_pixmap)
+        self.setBlocksImage(self.processed_img_screen, self.processed_img_scene, self.processed_pixmap)
 
 
     def convertFrameToPixmap(self, frame):
-        # Получение размеров изображения
         height, width = frame.shape
 
-        # Создание объекта QImage из данных OpenCV изображения
         qimage = QImage(frame.data, width, height, QImage.Format_Grayscale8)
 
-        # Создание объекта QPixmap из объекта QImage
         pixmap = QPixmap.fromImage(qimage)
 
         return pixmap
@@ -201,12 +223,9 @@ class Widget(QMainWindow,model.Proccess4Draw):
         self.points_arr = []
 
 
-    
     def getClaheHisto(self, img):
         ddepth = cv2.CV_16S
         kernel_size = 3
-
-        # img = cv2.convertScaleAbs(img)
 
         processed_img = self.clahe_process(img, self.slider.value()/100)
 
@@ -236,7 +255,8 @@ class Widget(QMainWindow,model.Proccess4Draw):
 
 
     def onSceneClicked(self, event):
-        if not self.processed_pixmap:
+
+        if not self.processed_pixmap or self.is_timer_working:
             return
         
         dot_radius = 10
@@ -256,7 +276,6 @@ class Widget(QMainWindow,model.Proccess4Draw):
                 min(pos.y(), scene_rect.bottom() - int(dot_radius/2) - 1)
                 ))
             
-
         # Увеличиваем счетчик добавленных точек 
         self.point_count += 1
         dot_coords = (pos.x()-int(dot_radius/2),pos.y()-int(dot_radius/2))

@@ -251,13 +251,7 @@ color: white;</string>
        <item>
         <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
-          <widget class="QPushButton" name="save_btn">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
+          <widget class="QPushButton" name="stop_btn">
            <property name="minimumSize">
             <size>
              <width>150</width>
@@ -273,7 +267,7 @@ border: 1px solid #6a6a6a;
 color: white;</string>
            </property>
            <property name="text">
-            <string>Save</string>
+            <string>Stop - Continue</string>
            </property>
           </widget>
          </item>
