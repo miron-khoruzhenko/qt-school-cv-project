@@ -78,3 +78,7 @@ CMakeLists.txt.user*
 
 *.pyproject*
 *.spec
+
+test.py
+updated.py
+temp*

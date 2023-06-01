@@ -57,7 +57,7 @@ class Widget(QMainWindow,model.Proccess4Draw):
 
         # ========== EVENTS ==========
         self.ui.load_img_btn.clicked.connect(self.onLoadBtnPress)
-        self.ui.process_img_btn.clicked.connect(self.onProccesImg)
+
         self.ui.save_btn.clicked.connect(self.onSaveBtnPress)
         self.ui.change_window.clicked.connect(self.changeWindows)
 
@@ -74,6 +74,11 @@ class Widget(QMainWindow,model.Proccess4Draw):
         self.point_count = 0
         self.points_arr = []
         self.line = None
+
+        if self.mode == "image":
+            self.ui.process_img_btn.clicked.connect(self.onProcessImg)
+        else:
+            self.ui.process_video_btn.clicked.connect(self.onProcessVideo)
 
 
     def changeWindows(self):
@@ -106,9 +111,7 @@ class Widget(QMainWindow,model.Proccess4Draw):
         else:
             video_path, _ = QFileDialog.getOpenFileName(self, "Open Video", "", "Video Files (*.mp4 *.avi)")
             if video_path:
-                print("\n\n\n\n\n\n"+video_path+"\n\n\n\n\n\n")
                 self.video_capture = cv2.VideoCapture(video_path)
-                print("\n\n\n\n\n\n",os.access(video_path, os.W_OK),"\n\n\n\n\n\n")
                 self.processVideo()  # Начало обработки видео
 
 
@@ -125,17 +128,13 @@ class Widget(QMainWindow,model.Proccess4Draw):
             print("Image saved successfully.")
 
 
-    def onProccesImg(self):
+    def onProcessImg(self):
         if not self.input_pixmap:
             return
         
         self.cv_processed_image = self.getClaheHisto(self.cv_load_image)
-        
-        file_path = 'temp_img.png'
-        cv2.imwrite(file_path, self.cv_processed_image)
-        
-        self.processed_pixmap = QPixmap(file_path)
-        os.remove(file_path)
+
+        self.processed_pixmap = self.convertFrameToPixmap(self.cv_processed_image)
 
         self.setBlocksImage(self.processed_img_screen, self.processed_img_scene, self.processed_pixmap)
 
@@ -144,43 +143,41 @@ class Widget(QMainWindow,model.Proccess4Draw):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.processVideo)
         self.timer.start(30)  # Запускаем таймер
-        
-    
-    def processVideo(self):
-        if self.cv_load_image is None:
-            return
-        
+
+
+    def processVideo(self):        
         # Чтение кадра из видео
         ret, frame = self.video_capture.read()
         if not ret:
             # Достигнут конец видео
             self.timer.stop()
             return
-        
-        # Обработка кадра
+
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        self.input_pixmap = self.convertFrameToPixmap(frame)
         processed_frame = self.getClaheHisto(frame)
-        
-        # Отображение результата в блоке processed_img
         processed_pixmap = self.convertFrameToPixmap(processed_frame)
+        self.setBlocksImage(self.loaded_img_screen, self.loaded_img_scene, self.input_pixmap)
         self.setBlocksImage(self.processed_img_screen, self.processed_img_scene, processed_pixmap)
 
 
     def convertFrameToPixmap(self, frame):
-        # Конвертация кадра в QPixmap для отображения в QGraphicsScene
-        height, width, channels = frame.shape
-        bytes_per_line = channels * width
-        qimage = QImage(frame.data, width, height, bytes_per_line, QImage.Format_RGB888)
-        pixmap = QPixmap.fromImage(qimage.rgbSwapped())
+        # Получение размеров изображения
+        height, width = frame.shape
+
+        # Создание объекта QImage из данных OpenCV изображения
+        qimage = QImage(frame.data, width, height, QImage.Format_Grayscale8)
+
+        # Создание объекта QPixmap из объекта QImage
+        pixmap = QPixmap.fromImage(qimage)
+
         return pixmap
 
 
     def setBlocksImage(self, graphic_block, graphic_scene, img):
         graphic_scene.clear()
-
         pixmap_item = QGraphicsPixmapItem(img)
-
         graphic_scene.addItem(pixmap_item)
-
         graphic_block.fitInView(pixmap_item, Qt.AspectRatioMode.KeepAspectRatio)
 
     
@@ -190,6 +187,7 @@ class Widget(QMainWindow,model.Proccess4Draw):
         if self.line:
             self.processed_img_scene.removeItem(self.line)
             self.line = None
+
         self.point_count = 0
         self.points_arr = []
 
@@ -198,6 +196,8 @@ class Widget(QMainWindow,model.Proccess4Draw):
     def getClaheHisto(self, img):
         ddepth = cv2.CV_16S
         kernel_size = 3
+
+        # img = cv2.convertScaleAbs(img)
 
         processed_img = self.clahe_process(img, self.slider.value()/100)
 
@@ -276,8 +276,8 @@ class Widget(QMainWindow,model.Proccess4Draw):
             )
 
             distance = math.sqrt(
-                (self.points_arr[0][0] - self.points_arr[1][0])**2 + 
-                (self.points_arr[0][1] - self.points_arr[0][1])**2
+                (self.points_arr[0][0] - self.points_arr[0][1])**2 + 
+                (self.points_arr[1][0] - self.points_arr[1][1])**2
             )
             distance = int(distance*100)/100
 

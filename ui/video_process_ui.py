@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'video_process.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.4.2
+## Created by: Qt User Interface Compiler version 6.5.1
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -98,17 +98,17 @@ class Ui_Widget(object):
 
         self.verticalLayout_3.addWidget(self.load_img_btn)
 
-        self.process_img_btn = QPushButton(Widget)
-        self.process_img_btn.setObjectName(u"process_img_btn")
-        sizePolicy.setHeightForWidth(self.process_img_btn.sizePolicy().hasHeightForWidth())
-        self.process_img_btn.setSizePolicy(sizePolicy)
-        self.process_img_btn.setMinimumSize(QSize(150, 50))
-        self.process_img_btn.setCursor(QCursor(Qt.PointingHandCursor))
-        self.process_img_btn.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(74, 74, 74, 255), stop:1 rgba(64, 64, 64, 255));\n"
+        self.process_video_btn = QPushButton(Widget)
+        self.process_video_btn.setObjectName(u"process_video_btn")
+        sizePolicy.setHeightForWidth(self.process_video_btn.sizePolicy().hasHeightForWidth())
+        self.process_video_btn.setSizePolicy(sizePolicy)
+        self.process_video_btn.setMinimumSize(QSize(150, 50))
+        self.process_video_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self.process_video_btn.setStyleSheet(u"background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(74, 74, 74, 255), stop:1 rgba(64, 64, 64, 255));\n"
 "border: 1px solid #6a6a6a;\n"
 "color: white;")
 
-        self.verticalLayout_3.addWidget(self.process_img_btn)
+        self.verticalLayout_3.addWidget(self.process_video_btn)
 
 
         self.horizontalLayout_3.addLayout(self.verticalLayout_3)
@@ -192,7 +192,7 @@ class Ui_Widget(object):
         Widget.setWindowTitle(QCoreApplication.translate("Widget", u"Widget", None))
         self.change_window.setText(QCoreApplication.translate("Widget", u"Mode: Video", None))
         self.load_img_btn.setText(QCoreApplication.translate("Widget", u"Load Video", None))
-        self.process_img_btn.setText(QCoreApplication.translate("Widget", u"Process", None))
+        self.process_video_btn.setText(QCoreApplication.translate("Widget", u"Process", None))
         self.save_btn.setText(QCoreApplication.translate("Widget", u"Save", None))
         self.length_label.setText("")
     # retranslateUi

@@ -152,7 +152,7 @@ color: white;</string>
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="process_img_btn">
+          <widget class="QPushButton" name="process_video_btn">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
              <horstretch>0</horstretch>
